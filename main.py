@@ -1,16 +1,20 @@
+#Package imports
 import pyautogui
 from pynput import keyboard
 from pynput import mouse
 import tkinter as tk
 import threading
 
+pyautogui.PAUSE = 0 #Removes the 0.1s interval limit on pyautogui
+
+#Global variables
 end = keyboard.Key.esc
 check = False
 x_coord = 0
 y_coord = 0
 mouseThread = None
-pyautogui.PAUSE = 0
 
+#Functions for ending the autoclicker by the hotkey (esc)
 def endPress(key, injected):
     global check
     if key == end:
@@ -21,7 +25,7 @@ def endPressListener():
     with keyboard.Listener(on_press=endPress) as listener:
         listener.join()
 
-
+#Main autoclick function
 def autoclick(button, interval, x, y):
     endThread = threading.Thread(target=endPressListener)
     endThread.daemon = True
@@ -34,6 +38,7 @@ def autoclick(button, interval, x, y):
             break
     print("Loop ended")
 
+#Functions for finding the autoclicking position
 def findMousePos(x, y, button, pressed):
     global x_coord, y_coord, mouseThread
     if button==mouse.Button.left:
@@ -47,6 +52,7 @@ def mousePosListener():
     with mouse.Listener(on_click=findMousePos) as listener:
         listener.join()
 
+#Function that handles the threading of finding the autoclicking position
 def startMouseListener():
     global mouseThread
     if mouseThread is None or not mouseThread.is_alive():
@@ -55,8 +61,15 @@ def startMouseListener():
         mouseThread.start()
     else:
         print("Mouse thread is already running.")
-    
 
+#Function to dynamically change the CPS label when changing the interval entry element
+def entryChanged(*args):
+    try:
+        cpsStringVar.set(str(1000/int(intervalEntry.get())) + " CPS")
+    except ValueError:
+        cpsStringVar.set("Invalid input")
+    
+#GUI (Tkinter)
 root = tk.Tk()
 root.title("Autoclicker Menu")
 root.geometry("400x450")
@@ -68,12 +81,6 @@ endStringVar = tk.StringVar()
 endStringVar.set(f"End Key: {end}")
 endKeyLabel = tk.Label(root, textvariable=endStringVar)
 endKeyLabel.pack(pady=20)
-
-def entryChanged(*args):
-    try:
-        cpsStringVar.set(str(1000/int(intervalEntry.get())) + " CPS")
-    except ValueError:
-        cpsStringVar.set("Invalid input")
 
 intervalLabel = tk.Label(root, text="Enter the interval between clicks in milliseconds (minimum of 5-10 ms)")
 intervalLabel.pack(pady=10)
