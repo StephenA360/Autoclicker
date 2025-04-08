@@ -4,12 +4,12 @@ from pynput import mouse
 import tkinter as tk
 import threading
 
-
 end = keyboard.Key.esc
 check = False
 x_coord = 0
 y_coord = 0
 mouseThread = None
+pyautogui.PAUSE = 0
 
 def endPress(key, injected):
     global check
@@ -59,7 +59,7 @@ def startMouseListener():
 
 root = tk.Tk()
 root.title("Autoclicker Menu")
-root.geometry("400x400")
+root.geometry("400x450")
 
 titleLabel = tk.Label(root, text="Autoclicker", font=("Helvetica", 12, "bold"))
 titleLabel.pack(pady=20)
@@ -69,11 +69,24 @@ endStringVar.set(f"End Key: {end}")
 endKeyLabel = tk.Label(root, textvariable=endStringVar)
 endKeyLabel.pack(pady=20)
 
-intervalLabel = tk.Label(root, text="Enter the interval between clicks in seconds (minimum of 0.1s)")
+def entryChanged(*args):
+    try:
+        cpsStringVar.set(str(1000/int(intervalEntry.get())) + " CPS")
+    except ValueError:
+        cpsStringVar.set("Invalid input")
+
+intervalLabel = tk.Label(root, text="Enter the interval between clicks in milliseconds (minimum of 5-10 ms)")
 intervalLabel.pack(pady=10)
-intervalEntry = tk.Entry(root)
+intervalStringVar = tk.StringVar()
+intervalStringVar.set("100")
+intervalStringVar.trace_add("write", entryChanged)
+intervalEntry = tk.Entry(root, textvariable=intervalStringVar)
 intervalEntry.pack(pady=20)
-intervalEntry.insert(0, "100")
+
+cpsStringVar = tk.StringVar()
+cpsStringVar.set(str(1000/int(intervalEntry.get())) + " CPS")
+cpsLabel = tk.Label(root, textvariable=cpsStringVar)
+cpsLabel.pack(pady=20)
 
 pos = tk.StringVar()
 pos.set(f"Autoclicking Position: ({x_coord}, {y_coord})")
